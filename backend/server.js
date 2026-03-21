@@ -11,7 +11,7 @@ connectDB();
 // Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
-    ? ['https://visionary-muffin-285c95.netlify.app/'] 
+    ? ['https://visionary-muffin-285c95.netlify.app']  // ✅ REMOVE /
     : [
         'http://localhost:3000',
         'http://127.0.0.1:5500',
