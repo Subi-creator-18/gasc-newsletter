@@ -10,6 +10,16 @@ connectDB();
 
 // Middleware
 app.use(cors({
+  origin: process.env.NODE_ENV === 'production'
+    ? ['https://your-netlify-app.netlify.app'] 
+    : [
+        'http://localhost:3000',
+        'http://127.0.0.1:5500',
+        'http://127.0.0.1:5501'
+      ],
+  credentials: true,
+}));
+/*app.use(cors({
   origin: [
         process.env.FRONTEND_URL,
         'http://127.0.0.1:5500',
@@ -17,7 +27,7 @@ app.use(cors({
         'http://localhost:3000'
     ],
   credentials: true
-}));
+}));*/
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
