@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — GASC Newsletter</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="text-center mb-4">
+      <img src="" id="college-logo" class="auth-logo mb-3" alt="GASC Logo" style="display:none">
+      <div class="auth-logo mb-3 d-flex align-items-center justify-content-center mx-auto bg-light rounded-circle" id="logo-placeholder" style="width:90px;height:90px;font-size:2rem;color:var(--gasc-navy)">
+        <i class="bi bi-mortarboard-fill"></i>
+      </div>
+      <h4 class="auth-title">GASC Newsletter</h4>
+      <p class="auth-subtitle">Gobi Arts &amp; Science College<br>Staff Portal</p>
+    </div>
+
+    <div id="login-error" class="alert-gasc-error mb-3" style="display:none"></div>
+
+    <form id="login-form" novalidate>
+      <div class="mb-3">
+        <label class="form-label" for="email">Email Address</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-envelope text-muted"></i></span>
+          <input type="email" class="form-control" id="email" placeholder="your.email@gasc.edu" required autocomplete="email">
+        </div>
+      </div>
+      <div class="mb-4">
+        <label class="form-label" for="password">Password</label>
+        <div class="input-group">
+          <span class="input-group-text bg-white"><i class="bi bi-lock text-muted"></i></span>
+          <input type="password" class="form-control" id="password" placeholder="Enter password" required autocomplete="current-password">
+          <button type="button" class="input-group-text bg-white border-start-0" id="toggle-pw" title="Show/hide password">
+            <i class="bi bi-eye" id="pw-icon"></i>
+          </button>
+        </div>
+      </div>
+      <button type="submit" class="btn-gasc w-100 py-2" id="login-btn">
+        <span id="login-text">Sign In</span>
+        <span id="login-spinner" class="spinner-border spinner-border-sm ms-2" style="display:none"></span>
+      </button>
+    </form>
+
+    <div class="text-center mt-4 text-muted" style="font-size:.8rem">
+      <i class="bi bi-shield-lock me-1"></i>Authorised staff only &nbsp;|&nbsp; GASC &copy; 2024
+    </div>
+  </div>
+</div>
+
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script>
+  Auth.redirectIfLoggedIn();
+
+  // Load college logo if available
+  (async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/admin/college-info');
+      const data = await res.json();
+      if (data.data?.logo_url) {
+        const logo = document.getElementById('college-logo');
+        const placeholder = document.getElementById('logo-placeholder');
+        logo.src = data.data.logo_url;
+        logo.style.display = '';
+        placeholder.style.display = 'none';
+      }
+    } catch {}
+  })();
+
+  // Toggle password visibility
+  document.getElementById('toggle-pw').addEventListener('click', () => {
+    const pw = document.getElementById('password');
+    const icon = document.getElementById('pw-icon');
+    if (pw.type === 'password') { pw.type = 'text'; icon.className = 'bi bi-eye-slash'; }
+    else { pw.type = 'password'; icon.className = 'bi bi-eye'; }
+  });
+
+  // Login form submit
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const errEl    = document.getElementById('login-error');
+    const btn      = document.getElementById('login-btn');
+    const text     = document.getElementById('login-text');
+    const spinner  = document.getElementById('login-spinner');
+
+    if (!email || !password) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = ''; return; }
+
+    errEl.style.display = 'none';
+    btn.disabled = true; text.textContent = 'Signing in...'; spinner.style.display = '';
+
+    try {
+      const res = await Api.auth.login(email, password);
+      Auth.setSession(res.data.token, res.data.user);
+      window.location.href = 'dashboard.html';
+    } catch (err) {
+      errEl.textContent = err.message || 'Login failed. Check your credentials.';
+      errEl.style.display = '';
+      btn.disabled = false; text.textContent = 'Sign In'; spinner.style.display = 'none';
+    }
+  });
+</script>
+</body>
+</html>

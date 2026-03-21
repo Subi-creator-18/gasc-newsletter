@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Newsletter Preview — GASC</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+
+<!-- No-print toolbar -->
+<div class="no-print sticky-top" style="background:var(--gasc-navy);padding:.75rem 1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;z-index:200">
+  <a href="volume.html" class="text-white text-decoration-none" style="font-size:.85rem">
+    <i class="bi bi-arrow-left me-1"></i>Back
+  </a>
+  <span class="text-white fw-bold flex-grow-1 text-center" id="nl-toolbar-title">Newsletter Preview</span>
+
+  <select class="form-select form-select-sm" id="vol-select-preview" style="width:280px;max-width:100%">
+    <option value="">— Select volume to preview —</option>
+  </select>
+
+  <button class="btn btn-sm btn-light fw-semibold" onclick="Newsletter.exportPDF()">
+    <i class="bi bi-file-earmark-pdf me-1"></i>Export PDF
+  </button>
+  <a href="dashboard.html" class="btn btn-sm btn-outline-light">Dashboard</a>
+</div>
+
+<!-- Newsletter render target -->
+<div id="newsletter-render">
+  <div class="d-flex align-items-center justify-content-center" style="min-height:80vh;background:#888">
+    <div class="text-center text-white">
+      <i class="bi bi-journal-richtext" style="font-size:4rem;opacity:.5"></i>
+      <p class="mt-3 fs-5">Select a volume above to preview the newsletter</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/components.js"></script>
+<script src="js/photoGrid.js"></script>
+<script src="js/newsletter.js"></script>
+<script>
+  // Load all volumes into select
+  (async () => {
+    try {
+      const res = await Api.volumes.list();
+      const sel = document.getElementById('vol-select-preview');
+      (res.data || []).forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v._id;
+        opt.textContent = `Vol.${v.volume_no}, No.${v.issue_no} — ${v.period_label} [${v.status}]`;
+        sel.appendChild(opt);
+      });
+
+      // Auto-load from URL param
+      const urlId = new URLSearchParams(window.location.search).get('id');
+      if (urlId) { sel.value = urlId; loadPreview(urlId); }
+    } catch(e) { console.error(e); }
+  })();
+
+  document.getElementById('vol-select-preview').addEventListener('change', function() {
+    if (this.value) loadPreview(this.value);
+    else document.getElementById('newsletter-render').innerHTML = `
+      <div class="d-flex align-items-center justify-content-center" style="min-height:80vh;background:#888">
+        <div class="text-center text-white">
+          <i class="bi bi-journal-richtext" style="font-size:4rem;opacity:.5"></i>
+          <p class="mt-3 fs-5">Select a volume above to preview the newsletter</p>
+        </div>
+      </div>`;
+  });
+
+  async function loadPreview(id) {
+    const container = document.getElementById('newsletter-render');
+    container.innerHTML = `<div class="d-flex align-items-center justify-content-center nl-preview-wrapper">
+      <div class="text-center text-white"><div class="spinner-border mb-3"></div><p>Generating newsletter...</p></div>
+    </div>`;
+    try {
+      const res = await Api.volumes.render(id);
+      const data = res.data;
+      document.getElementById('nl-toolbar-title').textContent =
+        `Vol.${data.volume.volume_no} No.${data.volume.issue_no} — ${data.volume.period_label}`;
+      container.innerHTML = `<div class="nl-preview-wrapper">${Newsletter.render(data)}</div>`;
+    } catch(e) {
+      container.innerHTML = `<div class="d-flex align-items-center justify-content-center" style="min-height:80vh;background:#888">
+        <div class="text-center text-white"><i class="bi bi-exclamation-circle" style="font-size:3rem"></i><p class="mt-2">${e.message}</p></div>
+      </div>`;
+      Toast.error(e.message);
+    }
+  }
+</script>
+</body>
+</html>

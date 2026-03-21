@@ -1,0 +1,58 @@
+<!-- ============================================================
+     sidebar-template.html
+     This file is NOT a standalone page — it documents the shared
+     sidebar HTML that is copy-pasted into every dashboard page.
+     ============================================================ -->
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <img src="" id="sb-logo" alt="GASC" style="display:none">
+    <div class="d-flex align-items-center justify-content-center bg-white bg-opacity-10 rounded" id="sb-logo-placeholder" style="width:44px;height:44px;min-width:44px">
+      <i class="bi bi-mortarboard-fill text-white" style="font-size:1.4rem"></i>
+    </div>
+    <div class="sidebar-brand-text">
+      <strong>GASC Newsletter</strong>
+      Gobi Arts &amp; Science College
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <!-- Staff links -->
+    <div data-role="staff,principal">
+      <div class="nav-section-label">Main</div>
+      <a href="dashboard.html" class="sidebar-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    </div>
+
+    <div data-role="staff">
+      <div class="nav-section-label">My Work</div>
+      <a href="submit.html" class="sidebar-link"><i class="bi bi-plus-circle"></i> New Submission</a>
+      <a href="my-submissions.html" class="sidebar-link"><i class="bi bi-collection"></i> My Submissions</a>
+    </div>
+
+    <div data-role="principal">
+      <div class="nav-section-label">Review</div>
+      <a href="review.html" class="sidebar-link"><i class="bi bi-clipboard-check"></i> Review Submissions</a>
+    </div>
+
+    <div data-role="principal">
+      <div class="nav-section-label">Newsletter</div>
+      <a href="volume.html" class="sidebar-link"><i class="bi bi-journal-richtext"></i> Volume Builder</a>
+      <a href="newsletter.html" class="sidebar-link"><i class="bi bi-file-earmark-text"></i> Preview &amp; Export</a>
+    </div>
+
+    <div data-role="principal">
+      <div class="nav-section-label">Admin</div>
+      <a href="admin.html" class="sidebar-link"><i class="bi bi-gear"></i> Settings &amp; Admin</a>
+    </div>
+  </nav>
+
+  <div class="sidebar-user">
+    <strong id="sidebar-user-name">Loading...</strong>
+    <span id="sidebar-user-role"></span>
+    <div id="sidebar-user-dept" class="text-truncate" style="opacity:.6;font-size:.78rem"></div>
+    <a href="#" class="logout-btn d-block mt-2" style="color:rgba(255,255,255,.5);font-size:.8rem;text-decoration:none">
+      <i class="bi bi-box-arrow-left me-1"></i>Logout
+    </a>
+  </div>
+</aside>

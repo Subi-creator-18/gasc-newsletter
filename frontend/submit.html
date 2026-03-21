@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Submission — GASC Newsletter</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+<div class="app-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="d-flex align-items-center justify-content-center bg-white bg-opacity-10 rounded" style="width:44px;height:44px;min-width:44px">
+        <i class="bi bi-mortarboard-fill text-white" style="font-size:1.4rem"></i>
+      </div>
+      <div class="sidebar-brand-text"><strong>GASC Newsletter</strong>Gobi Arts &amp; Science College</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div><div class="nav-section-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><i class="bi bi-speedometer2"></i> Dashboard</a></div>
+      <div data-role="staff">
+        <div class="nav-section-label">My Work</div>
+        <a href="submit.html" class="sidebar-link"><i class="bi bi-plus-circle"></i> New Submission</a>
+        <a href="my-submissions.html" class="sidebar-link"><i class="bi bi-collection"></i> My Submissions</a>
+      </div>
+      <div data-role="principal">
+        <div class="nav-section-label">Review</div>
+        <a href="review.html" class="sidebar-link"><i class="bi bi-clipboard-check"></i> Review Submissions</a>
+        <div class="nav-section-label">Newsletter</div>
+        <a href="volume.html" class="sidebar-link"><i class="bi bi-journal-richtext"></i> Volume Builder</a>
+        <a href="newsletter.html" class="sidebar-link"><i class="bi bi-file-earmark-text"></i> Preview &amp; Export</a>
+        <div class="nav-section-label">Admin</div>
+        <a href="admin.html" class="sidebar-link"><i class="bi bi-gear"></i> Settings &amp; Admin</a>
+      </div>
+    </nav>
+    <div class="sidebar-user">
+      <strong id="sidebar-user-name">—</strong>
+      <span id="sidebar-user-role"></span>
+      <div id="sidebar-user-dept" style="opacity:.6;font-size:.78rem"></div>
+      <a href="#" class="logout-btn d-block mt-2" style="color:rgba(255,255,255,.5);font-size:.8rem;text-decoration:none"><i class="bi bi-box-arrow-left me-1"></i>Logout</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <div class="top-bar">
+      <button class="sidebar-toggle me-3" id="sidebar-toggle"><i class="bi bi-list"></i></button>
+      <h1 class="top-bar-title">New Submission</h1>
+    </div>
+    <div class="page-body">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+          <!-- Dept info banner -->
+          <div class="alert-gasc-info mb-4 d-flex align-items-center gap-2">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Submitting for: <strong id="staff-dept-display">Loading...</strong>
+            — Your department is auto-assigned from your profile.</span>
+          </div>
+
+          <div class="content-card">
+            <div class="content-card-header">
+              <span class="fw-bold"><i class="bi bi-pencil-square me-2"></i>Submit Event / Research / Achievement</span>
+            </div>
+            <div class="content-card-body">
+              <div id="submit-error" class="alert-gasc-error mb-3" style="display:none"></div>
+              <div id="submit-success" class="alert-gasc-success mb-3" style="display:none"></div>
+
+              <form id="submit-form" novalidate>
+                <!-- Category -->
+                <div class="mb-3">
+                  <label class="form-label">Category <span class="text-danger">*</span></label>
+                  <select class="form-select" id="category" required>
+                    <option value="">— Select category —</option>
+                    <option value="research">Research Publication</option>
+                    <option value="event">Event / Programme</option>
+                    <option value="achievement">Achievement / Award</option>
+                    <option value="general">General</option>
+                  </select>
+                </div>
+
+                <!-- Title -->
+                <div class="mb-3">
+                  <label class="form-label">Title / Headline <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="title" maxlength="300"
+                    placeholder="Brief title of the event or publication" required>
+                  <div class="text-muted mt-1" style="font-size:.78rem"><span id="title-count">0</span>/300 characters</div>
+                </div>
+
+                <!-- Content -->
+                <div class="mb-3">
+                  <label class="form-label">Content / Details <span class="text-danger">*</span></label>
+                  <textarea class="form-control" id="content" rows="6"
+                    placeholder="Enter the full details of the event, research paper, achievement etc. This will appear as a bullet point in the newsletter."
+                    required></textarea>
+                  <div class="text-muted mt-1" style="font-size:.78rem">Write clearly — this text will appear verbatim in the newsletter.</div>
+                </div>
+
+                <!-- Photo Upload -->
+                <div class="mb-4">
+                  <label class="form-label">Photos <span class="text-muted">(Optional — Max 4)</span></label>
+                  <div class="photo-upload-zone" id="photo-zone">
+                    <i class="bi bi-cloud-upload"></i>
+                    <p class="mt-2 mb-1 fw-semibold">Drag &amp; drop photos here</p>
+                    <p class="text-muted mb-0" style="font-size:.82rem">or click to browse &nbsp;|&nbsp; JPEG, PNG, WebP &nbsp;|&nbsp; Max 5MB each &nbsp;|&nbsp; Max 4 photos</p>
+                  </div>
+                  <input type="file" id="photo-input" accept="image/*" multiple style="display:none">
+                  <div id="photo-preview" class="photo-preview-grid mt-2"></div>
+                  <div class="text-muted mt-2" style="font-size:.78rem">
+                    <i class="bi bi-info-circle me-1"></i>
+                    1 photo = full width | 2 photos = 50% each | 3 photos = 33% each | 4 photos = 25% each
+                  </div>
+                </div>
+
+                <!-- Submit buttons -->
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn-gasc px-4 py-2" id="submit-btn">
+                    <i class="bi bi-send me-1"></i>
+                    <span id="submit-text">Submit for Review</span>
+                    <span id="submit-spinner" class="spinner-border spinner-border-sm ms-2" style="display:none"></span>
+                  </button>
+                  <button type="button" class="btn-outline-gasc px-4 py-2" onclick="resetForm()">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                  </button>
+                  <a href="my-submissions.html" class="btn-outline-gasc px-4 py-2 text-decoration-none">
+                    <i class="bi bi-collection me-1"></i> My Submissions
+                  </a>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Guideline card -->
+          <div class="content-card mt-4">
+            <div class="content-card-header"><span class="fw-bold"><i class="bi bi-lightbulb me-1"></i> Submission Guidelines</span></div>
+            <div class="content-card-body" style="font-size:.88rem">
+              <ul class="mb-0 ps-3">
+                <li>Your submission will be reviewed by the Principal before inclusion in the newsletter.</li>
+                <li>The <strong>department</strong> is automatically assigned from your profile — contact admin if it is incorrect.</li>
+                <li>Write the content clearly as it will appear in the newsletter bulletin.</li>
+                <li>Photos should be event-related and high quality (minimum 800×600px recommended).</li>
+                <li>Approved submissions enter a pool — the Principal selects which ones go into each newsletter volume.</li>
+                <li>You can edit or delete your submission while it is still <strong>Pending</strong>.</li>
+              </ul>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/components.js"></script>
+<script src="js/photoGrid.js"></script>
+<script>
+  Auth.requireRole('staff');
+  const user = Auth.getUser();
+  initSidebar();
+
+  // Show dept
+  const deptName = user.department_id?.name || 'No department assigned';
+  document.getElementById('staff-dept-display').textContent = deptName;
+
+  // Init photo upload zone
+  PhotoGrid.initUploadZone('photo-zone', 'photo-input', 'photo-preview');
+
+  // Title character count
+  document.getElementById('title').addEventListener('input', function() {
+    document.getElementById('title-count').textContent = this.value.length;
+  });
+
+  // Submit form
+  document.getElementById('submit-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const errEl     = document.getElementById('submit-error');
+    const successEl = document.getElementById('submit-success');
+    const btn       = document.getElementById('submit-btn');
+    const text      = document.getElementById('submit-text');
+    const spinner   = document.getElementById('submit-spinner');
+
+    const category = document.getElementById('category').value;
+    const title    = document.getElementById('title').value.trim();
+    const content  = document.getElementById('content').value.trim();
+
+    errEl.style.display = 'none'; successEl.style.display = 'none';
+
+    if (!category) { errEl.textContent='Please select a category.'; errEl.style.display=''; return; }
+    if (!title)    { errEl.textContent='Please enter a title.';      errEl.style.display=''; return; }
+    if (!content)  { errEl.textContent='Please enter content.';      errEl.style.display=''; return; }
+
+    btn.disabled=true; text.textContent='Submitting...'; spinner.style.display='';
+
+    try {
+      const fd = PhotoGrid.buildFormData({ category, title, content });
+      await Api.submissions.create(fd);
+      successEl.innerHTML = '<i class="bi bi-check-circle me-1"></i> Submission sent for Principal\'s review!';
+      successEl.style.display = '';
+      resetForm();
+      Toast.success('Submission created successfully!');
+    } catch(err) {
+      errEl.textContent = err.message || 'Submission failed.';
+      errEl.style.display = '';
+      Toast.error(err.message);
+    } finally {
+      btn.disabled=false; text.textContent='Submit for Review'; spinner.style.display='none';
+    }
+  });
+
+  function resetForm() {
+    document.getElementById('submit-form').reset();
+    document.getElementById('title-count').textContent = '0';
+    PhotoGrid.reset('photo-preview');
+  }
+</script>
+</body>
+</html>

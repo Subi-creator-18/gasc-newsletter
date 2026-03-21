@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Volume Builder — GASC Newsletter</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="d-flex align-items-center justify-content-center bg-white bg-opacity-10 rounded" style="width:44px;height:44px;min-width:44px">
+        <i class="bi bi-mortarboard-fill text-white" style="font-size:1.4rem"></i>
+      </div>
+      <div class="sidebar-brand-text"><strong>GASC Newsletter</strong>Gobi Arts &amp; Science College</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div><div class="nav-section-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><i class="bi bi-speedometer2"></i> Dashboard</a></div>
+      <div data-role="principal">
+        <div class="nav-section-label">Review</div>
+        <a href="review.html" class="sidebar-link"><i class="bi bi-clipboard-check"></i> Review Submissions</a>
+        <div class="nav-section-label">Newsletter</div>
+        <a href="volume.html" class="sidebar-link"><i class="bi bi-journal-richtext"></i> Volume Builder</a>
+        <a href="newsletter.html" class="sidebar-link"><i class="bi bi-file-earmark-text"></i> Preview &amp; Export</a>
+        <div class="nav-section-label">Admin</div>
+        <a href="admin.html" class="sidebar-link"><i class="bi bi-gear"></i> Settings &amp; Admin</a>
+      </div>
+    </nav>
+    <div class="sidebar-user">
+      <strong id="sidebar-user-name">—</strong>
+      <span id="sidebar-user-role"></span>
+      <div id="sidebar-user-dept" style="opacity:.6;font-size:.78rem"></div>
+      <a href="#" class="logout-btn d-block mt-2" style="color:rgba(255,255,255,.5);font-size:.8rem;text-decoration:none"><i class="bi bi-box-arrow-left me-1"></i>Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <button class="sidebar-toggle me-3" id="sidebar-toggle"><i class="bi bi-list"></i></button>
+      <h1 class="top-bar-title">Volume Builder</h1>
+    </div>
+    <div class="page-body">
+
+      <div class="row g-4">
+        <!-- Left: Volume selector + current items -->
+        <div class="col-lg-6">
+
+          <!-- Volume Selector -->
+          <div class="content-card mb-4">
+            <div class="content-card-header">
+              <span class="fw-bold"><i class="bi bi-journal-richtext me-2"></i>Select Volume</span>
+              <button class="btn-gasc btn-sm py-1 px-3" data-bs-toggle="modal" data-bs-target="#newVolModal">+ New</button>
+            </div>
+            <div class="content-card-body">
+              <select class="form-select" id="volume-select">
+                <option value="">— Select a volume to manage —</option>
+              </select>
+              <div id="volume-info" class="mt-3" style="display:none">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span id="vol-status-badge"></span>
+                  <span class="text-muted small" id="vol-period"></span>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                  <button class="btn-gasc btn-sm py-1 px-3" onclick="openPreview()" id="preview-btn">
+                    <i class="bi bi-eye me-1"></i>Preview
+                  </button>
+                  <button class="btn-gasc-gold btn-gasc btn-sm py-1 px-3" onclick="publishVolume()" id="publish-btn">
+                    <i class="bi bi-send me-1"></i>Publish
+                  </button>
+                  <button class="btn-outline-gasc btn-sm py-1 px-3" onclick="unpublishVolume()" id="unpublish-btn" style="display:none">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Revert to Draft
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Principal Message for Volume -->
+          <div class="content-card mb-4" id="message-card" style="display:none">
+            <div class="content-card-header"><span class="fw-bold"><i class="bi bi-chat-quote me-2"></i>Principal's Message</span></div>
+            <div class="content-card-body">
+              <textarea class="form-control" id="principal-message" rows="6" placeholder="Write the principal's message for this volume..."></textarea>
+              <button class="btn-gasc mt-2 px-4" onclick="saveMessage()">
+                <i class="bi bi-save me-1"></i> Save Message
+              </button>
+            </div>
+          </div>
+
+          <!-- Items currently in volume -->
+          <div class="content-card" id="vol-items-card" style="display:none">
+            <div class="content-card-header">
+              <span class="fw-bold">In This Volume <span class="badge bg-secondary ms-1" id="vol-count">0</span></span>
+            </div>
+            <div class="content-card-body p-2" id="vol-items-list">
+              <div class="text-center text-muted py-3 small">No submissions added yet</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Approved pool to add from -->
+        <div class="col-lg-6">
+          <div class="content-card">
+            <div class="content-card-header">
+              <span class="fw-bold"><i class="bi bi-collection me-2"></i>Approved Pool</span>
+              <span class="text-muted small" id="pool-count">0 available</span>
+            </div>
+            <div class="content-card-body p-2">
+              <!-- Filter pool -->
+              <div class="mb-2 px-1">
+                <div class="d-flex gap-2 flex-wrap">
+                  <select class="form-select form-select-sm" id="pool-dept-filter" style="flex:1;min-width:140px">
+                    <option value="">All Departments</option>
+                  </select>
+                  <select class="form-select form-select-sm" id="pool-cat-filter" style="width:140px">
+                    <option value="">All Categories</option>
+                    <option value="research">Research</option>
+                    <option value="event">Event</option>
+                    <option value="achievement">Achievement</option>
+                    <option value="general">General</option>
+                  </select>
+                </div>
+              </div>
+              <div id="pool-info" class="alert-gasc-info mb-2 small px-2 py-1" style="display:none"></div>
+              <div class="vol-approved-pool" id="approved-pool">
+                <div class="text-center text-muted py-3 small">Select a volume first</div>
+              </div>
+              <div class="mt-2 px-1">
+                <button class="btn-gasc w-100 py-2" id="add-selected-btn" onclick="addSelected()" disabled>
+                  <i class="bi bi-plus-circle me-1"></i>
+                  Add Selected (<span id="selected-count">0</span>) to Volume
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Volume Modal -->
+<div class="modal fade" id="newVolModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title">Create New Volume</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <div class="modal-body">
+        <div id="nv-error" class="alert-gasc-error mb-3" style="display:none"></div>
+        <div class="row g-3">
+          <div class="col-6"><label class="form-label">Volume No.</label>
+            <input type="number" class="form-control" id="nv-vol" min="1"></div>
+          <div class="col-6"><label class="form-label">Issue No.</label>
+            <input type="number" class="form-control" id="nv-issue" min="1"></div>
+          <div class="col-12"><label class="form-label">Period Label</label>
+            <input type="text" class="form-control" id="nv-period" placeholder="e.g. January – March, 2024"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn-gasc px-4" id="create-vol-btn">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/components.js"></script>
+<script>
+  Auth.requireRole('principal');
+  initSidebar();
+
+  let currentVolumeId = null;
+  let currentVolume = null;
+  let selectedSubmissionIds = new Set();
+  let poolSubmissions = [];
+
+  // Load volumes into select
+  async function loadVolumes() {
+    try {
+      const res = await Api.volumes.list();
+      const sel = document.getElementById('volume-select');
+      sel.innerHTML = '<option value="">— Select a volume to manage —</option>';
+      (res.data || []).forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v._id;
+        opt.textContent = `Vol.${v.volume_no}, No.${v.issue_no} — ${v.period_label} [${v.status}]`;
+        sel.appendChild(opt);
+      });
+      // Auto-select from URL param
+      const urlId = new URLSearchParams(window.location.search).get('id');
+      if (urlId) { sel.value = urlId; loadVolume(urlId); }
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  // Load departments for pool filter
+  (async () => {
+    try {
+      const res = await Api.admin.getDepts();
+      const sel = document.getElementById('pool-dept-filter');
+      (res.data||[]).forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d._id; opt.textContent = d.name;
+        sel.appendChild(opt);
+      });
+    } catch {}
+  })();
+
+  document.getElementById('volume-select').addEventListener('change', function() {
+    if (this.value) loadVolume(this.value);
+    else clearVolume();
+  });
+
+  document.getElementById('pool-dept-filter').addEventListener('change', filterPool);
+  document.getElementById('pool-cat-filter').addEventListener('change', filterPool);
+
+  async function loadVolume(id) {
+    currentVolumeId = id; selectedSubmissionIds = new Set();
+    document.getElementById('selected-count').textContent = '0';
+    document.getElementById('add-selected-btn').disabled = true;
+    try {
+      const [volRes, poolRes] = await Promise.all([Api.volumes.get(id), Api.review.approved()]);
+      const { volume } = volRes.data;
+      currentVolume = volume;
+      poolSubmissions = poolRes.data.submissions || [];
+
+      // Show/hide UI
+      document.getElementById('volume-info').style.display = '';
+      document.getElementById('message-card').style.display = '';
+      document.getElementById('vol-items-card').style.display = '';
+
+      // Status badge
+      document.getElementById('vol-status-badge').innerHTML = statusBadge(volume.status);
+      document.getElementById('vol-period').textContent = volume.period_label;
+      document.getElementById('principal-message').value = volume.principal_message || '';
+
+      // Toggle publish/unpublish
+      document.getElementById('publish-btn').style.display = volume.status === 'draft' ? '' : 'none';
+      document.getElementById('unpublish-btn').style.display = volume.status === 'published' ? '' : 'none';
+
+      renderVolumeItems(volRes.data);
+      renderPool();
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function renderVolumeItems(data) {
+    const inVolIds = new Set(currentVolume.submission_ids.map(id => id.toString()));
+    const list = document.getElementById('vol-items-list');
+    document.getElementById('vol-count').textContent = currentVolume.submission_ids.length;
+
+    const inVol = Object.values(data.grouped || {}).flatMap(g => g.submissions);
+    if (!inVol.length) {
+      list.innerHTML = '<div class="text-center text-muted py-3 small">No submissions in this volume yet</div>';
+      return;
+    }
+    list.innerHTML = inVol.map(s => `
+      <div class="vol-submission-item d-flex justify-content-between align-items-start">
+        <div style="flex:1;min-width:0">
+          <div class="dept-tag">${escHtml(s.department_id?.name||'—')}</div>
+          <div class="fw-semibold text-truncate" style="font-size:.85rem">${escHtml(s.title)}</div>
+          <small class="text-muted">${escHtml(s.staff_id?.name||'—')}</small>
+        </div>
+        <button class="btn btn-sm btn-outline-danger ms-2 flex-shrink-0" onclick="removeFromVolume('${s._id}')">
+          <i class="bi bi-x"></i>
+        </button>
+      </div>`).join('');
+  }
+
+  function renderPool() {
+    if (!currentVolumeId) return;
+    const inVolIds = new Set((currentVolume?.submission_ids||[]).map(id=>id.toString()));
+    const deptFilter = document.getElementById('pool-dept-filter').value;
+    const catFilter  = document.getElementById('pool-cat-filter').value;
+
+    let filtered = poolSubmissions.filter(s => !inVolIds.has(s._id.toString()));
+    if (deptFilter) filtered = filtered.filter(s => s.department_id?._id === deptFilter);
+    if (catFilter)  filtered = filtered.filter(s => s.category === catFilter);
+
+    document.getElementById('pool-count').textContent = `${filtered.length} available`;
+    const container = document.getElementById('approved-pool');
+
+    if (!filtered.length) {
+      container.innerHTML = '<div class="text-center text-muted py-3 small">No approved submissions available to add</div>';
+      return;
+    }
+
+    container.innerHTML = filtered.map(s => `
+      <div class="vol-submission-item ${selectedSubmissionIds.has(s._id) ? 'selected' : ''}"
+           id="pool-item-${s._id}" onclick="toggleSelect('${s._id}')">
+        <div class="d-flex justify-content-between align-items-start">
+          <div style="flex:1;min-width:0">
+            <span class="dept-tag">${escHtml(s.department_id?.name||'—')}</span>
+            ${categoryBadge(s.category)}
+            <div class="fw-semibold mt-1" style="font-size:.85rem">${escHtml(s.title)}</div>
+            <small class="text-muted">${escHtml(s.staff_id?.name||'—')} · ${fmtDate(s.createdAt)}</small>
+          </div>
+          <div class="ms-2 flex-shrink-0">
+            ${selectedSubmissionIds.has(s._id) ? '<i class="bi bi-check-circle-fill text-success fs-5"></i>' : '<i class="bi bi-circle text-muted fs-5"></i>'}
+          </div>
+        </div>
+        ${s.content ? `<div class="text-muted mt-1" style="font-size:.78rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${escHtml(s.content)}</div>` : ''}
+        ${s.photos?.length ? `<div class="text-muted mt-1" style="font-size:.75rem"><i class="bi bi-image me-1"></i>${s.photos.length} photo(s)</div>` : ''}
+      </div>`).join('');
+  }
+
+  function filterPool() { selectedSubmissionIds.clear(); updateSelectedCount(); renderPool(); }
+
+  function toggleSelect(id) {
+    if (selectedSubmissionIds.has(id)) selectedSubmissionIds.delete(id);
+    else selectedSubmissionIds.add(id);
+    updateSelectedCount();
+    renderPool();
+  }
+
+  function updateSelectedCount() {
+    const count = selectedSubmissionIds.size;
+    document.getElementById('selected-count').textContent = count;
+    document.getElementById('add-selected-btn').disabled = (count === 0 || !currentVolumeId);
+  }
+
+  async function addSelected() {
+    if (!currentVolumeId || selectedSubmissionIds.size === 0) return;
+    try {
+      await Api.volumes.add(currentVolumeId, Array.from(selectedSubmissionIds));
+      Toast.success(`${selectedSubmissionIds.size} submission(s) added to volume!`);
+      selectedSubmissionIds.clear();
+      await loadVolume(currentVolumeId);
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  async function removeFromVolume(subId) {
+    if (!confirmAction('Remove this submission from the volume?')) return;
+    try {
+      await Api.volumes.remove(currentVolumeId, subId);
+      Toast.success('Removed from volume');
+      await loadVolume(currentVolumeId);
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  async function saveMessage() {
+    const msg = document.getElementById('principal-message').value;
+    try {
+      await Api.volumes.setMessage(currentVolumeId, msg);
+      Toast.success('Message saved!');
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  async function publishVolume() {
+    if (!confirmAction('Publish this volume? It will be visible to everyone.')) return;
+    try {
+      await Api.volumes.publish(currentVolumeId);
+      Toast.success('Volume published!');
+      await loadVolume(currentVolumeId);
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  async function unpublishVolume() {
+    if (!confirmAction('Revert this volume to draft?')) return;
+    try {
+      await Api.volumes.unpublish(currentVolumeId);
+      Toast.success('Volume reverted to draft');
+      await loadVolume(currentVolumeId);
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function openPreview() {
+    if (currentVolumeId) window.open(`newsletter.html?id=${currentVolumeId}`, '_blank');
+  }
+
+  function clearVolume() {
+    currentVolumeId = null; currentVolume = null;
+    document.getElementById('volume-info').style.display = 'none';
+    document.getElementById('message-card').style.display = 'none';
+    document.getElementById('vol-items-card').style.display = 'none';
+    document.getElementById('approved-pool').innerHTML = '<div class="text-center text-muted py-3 small">Select a volume first</div>';
+  }
+
+  // Create volume
+  document.getElementById('create-vol-btn').addEventListener('click', async () => {
+    const vol_no = document.getElementById('nv-vol').value;
+    const iss_no = document.getElementById('nv-issue').value;
+    const period = document.getElementById('nv-period').value.trim();
+    const errEl  = document.getElementById('nv-error');
+    if (!vol_no || !iss_no || !period) { errEl.textContent='All fields required'; errEl.style.display=''; return; }
+    errEl.style.display = 'none';
+    try {
+      const res = await Api.volumes.create({ volume_no:parseInt(vol_no), issue_no:parseInt(iss_no), period_label:period });
+      Toast.success('Volume created!');
+      bootstrap.Modal.getInstance(document.getElementById('newVolModal')).hide();
+      await loadVolumes();
+      document.getElementById('volume-select').value = res.data._id;
+      loadVolume(res.data._id);
+    } catch(e) { errEl.textContent=e.message; errEl.style.display=''; }
+  });
+
+  loadVolumes();
+</script>
+</body>
+</html>

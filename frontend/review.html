@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Submissions — GASC Newsletter</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/custom.css">
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="d-flex align-items-center justify-content-center bg-white bg-opacity-10 rounded" style="width:44px;height:44px;min-width:44px">
+        <i class="bi bi-mortarboard-fill text-white" style="font-size:1.4rem"></i>
+      </div>
+      <div class="sidebar-brand-text"><strong>GASC Newsletter</strong>Gobi Arts &amp; Science College</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div><div class="nav-section-label">Main</div>
+        <a href="dashboard.html" class="sidebar-link"><i class="bi bi-speedometer2"></i> Dashboard</a></div>
+      <div data-role="principal">
+        <div class="nav-section-label">Review</div>
+        <a href="review.html" class="sidebar-link"><i class="bi bi-clipboard-check"></i> Review Submissions</a>
+        <div class="nav-section-label">Newsletter</div>
+        <a href="volume.html" class="sidebar-link"><i class="bi bi-journal-richtext"></i> Volume Builder</a>
+        <a href="newsletter.html" class="sidebar-link"><i class="bi bi-file-earmark-text"></i> Preview &amp; Export</a>
+        <div class="nav-section-label">Admin</div>
+        <a href="admin.html" class="sidebar-link"><i class="bi bi-gear"></i> Settings &amp; Admin</a>
+      </div>
+    </nav>
+    <div class="sidebar-user">
+      <strong id="sidebar-user-name">—</strong>
+      <span id="sidebar-user-role"></span>
+      <div id="sidebar-user-dept" style="opacity:.6;font-size:.78rem"></div>
+      <a href="#" class="logout-btn d-block mt-2" style="color:rgba(255,255,255,.5);font-size:.8rem;text-decoration:none"><i class="bi bi-box-arrow-left me-1"></i>Logout</a>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="top-bar">
+      <button class="sidebar-toggle me-3" id="sidebar-toggle"><i class="bi bi-list"></i></button>
+      <h1 class="top-bar-title">Review Submissions</h1>
+    </div>
+    <div class="page-body">
+
+      <!-- Tabs -->
+      <ul class="nav nav-pills mb-4 gap-2" id="review-tabs">
+        <li class="nav-item">
+          <button class="nav-link active" id="tab-pending" onclick="switchTab('pending')">
+            <i class="bi bi-hourglass-split me-1"></i>Pending
+            <span class="badge bg-warning text-dark ms-1" id="pending-count">0</span>
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="tab-approved" onclick="switchTab('approved')">
+            <i class="bi bi-check-circle me-1"></i>Approved
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="tab-rejected" onclick="switchTab('rejected')">
+            <i class="bi bi-x-circle me-1"></i>Rejected
+          </button>
+        </li>
+      </ul>
+
+      <!-- Dept filter -->
+      <div class="d-flex gap-2 align-items-center mb-3 flex-wrap">
+        <label class="fw-semibold mb-0" style="font-size:.88rem">Department:</label>
+        <select class="form-select form-select-sm" id="dept-filter" style="width:220px">
+          <option value="">All Departments</option>
+        </select>
+        <span class="text-muted ms-auto" style="font-size:.85rem" id="result-count"></span>
+      </div>
+
+      <!-- Submissions container -->
+      <div id="review-container">
+        <div class="text-center py-5 text-muted">
+          <div class="spinner-border text-secondary mb-3"></div>
+          <p>Loading submissions...</p>
+        </div>
+      </div>
+
+      <div id="pagination-container" class="mt-3 d-flex justify-content-center"></div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-x-circle text-danger me-2"></i>Reject Submission</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="reject-id">
+        <p class="text-muted mb-3">Please provide a reason so the staff member can understand and revise.</p>
+        <label class="form-label fw-semibold">Rejection Comment <span class="text-danger">*</span></label>
+        <textarea class="form-control" id="reject-comment" rows="4" placeholder="e.g. Please include more details about the event date and venue..."></textarea>
+        <div id="reject-error" class="alert-gasc-error mt-2" style="display:none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn-gasc-maroon btn-gasc px-4" id="confirm-reject-btn">
+          <i class="bi bi-x-circle me-1"></i>Reject
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/api.js"></script>
+<script src="js/components.js"></script>
+<script>
+  Auth.requireRole('principal');
+  initSidebar();
+
+  let currentTab = 'pending';
+  let currentPage = 1;
+  const limit = 15;
+
+  // Load departments for filter
+  (async () => {
+    try {
+      const res = await Api.admin.getDepts();
+      const sel = document.getElementById('dept-filter');
+      (res.data || []).forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d._id; opt.textContent = d.name;
+        sel.appendChild(opt);
+      });
+    } catch {}
+  })();
+
+  document.getElementById('dept-filter').addEventListener('change', () => { currentPage=1; loadSubmissions(); });
+
+  function switchTab(tab) {
+    currentTab = tab; currentPage = 1;
+    ['pending','approved','rejected'].forEach(t => {
+      document.getElementById(`tab-${t}`).classList.toggle('active', t===tab);
+    });
+    loadSubmissions();
+  }
+
+  async function loadSubmissions() {
+    const container = document.getElementById('review-container');
+    const dept = document.getElementById('dept-filter').value;
+    container.innerHTML = `<div class="text-center py-4"><div class="spinner-border text-secondary"></div></div>`;
+
+    try {
+      let res;
+      const params = { page: currentPage, limit };
+      if (dept) params.dept = dept;
+
+      if (currentTab === 'pending') res = await Api.review.pending(params);
+      else res = await Api.review.all({ ...params, status: currentTab });
+
+      const { submissions, total } = res.data;
+      document.getElementById('result-count').textContent = `${total || 0} submission(s)`;
+
+      // Update pending badge
+      if (currentTab === 'pending') {
+        document.getElementById('pending-count').textContent = total || 0;
+      }
+
+      if (!submissions?.length) {
+        container.innerHTML = emptyState(`No ${currentTab} submissions found.`, 'bi-clipboard');
+        document.getElementById('pagination-container').innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = submissions.map(s => submissionCard(s, getPrincipalActions(s))).join('');
+      renderPagination('pagination-container', total, limit, currentPage, (p) => { currentPage=p; loadSubmissions(); });
+    } catch(e) {
+      Toast.error(e.message);
+      container.innerHTML = emptyState('Failed to load submissions.', 'bi-exclamation-circle');
+    }
+  }
+
+  function getPrincipalActions(sub) {
+    if (sub.status !== 'pending') return '';
+    return `
+      <button class="btn btn-sm btn-success me-1" onclick="approveSubmission('${sub._id}')">
+        <i class="bi bi-check-lg me-1"></i>Approve
+      </button>
+      <button class="btn btn-sm btn-outline-danger" onclick="openReject('${sub._id}')">
+        <i class="bi bi-x-lg me-1"></i>Reject
+      </button>`;
+  }
+
+  async function approveSubmission(id) {
+    if (!confirmAction('Approve this submission?')) return;
+    try {
+      await Api.review.approve(id);
+      Toast.success('Submission approved!');
+      loadSubmissions();
+    } catch(e) { Toast.error(e.message); }
+  }
+
+  function openReject(id) {
+    document.getElementById('reject-id').value = id;
+    document.getElementById('reject-comment').value = '';
+    document.getElementById('reject-error').style.display = 'none';
+    new bootstrap.Modal(document.getElementById('rejectModal')).show();
+  }
+
+  document.getElementById('confirm-reject-btn').addEventListener('click', async () => {
+    const id      = document.getElementById('reject-id').value;
+    const comment = document.getElementById('reject-comment').value.trim();
+    const errEl   = document.getElementById('reject-error');
+    if (!comment) { errEl.textContent='Rejection comment is required.'; errEl.style.display=''; return; }
+    errEl.style.display = 'none';
+    try {
+      await Api.review.reject(id, comment);
+      Toast.success('Submission rejected.');
+      bootstrap.Modal.getInstance(document.getElementById('rejectModal')).hide();
+      loadSubmissions();
+    } catch(e) { errEl.textContent=e.message; errEl.style.display=''; }
+  });
+
+  loadSubmissions();
+</script>
+</body>
+</html>
